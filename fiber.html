@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中華電信光纖規格計算機 (進階版)</title>
+    <style>
+        :root {
+            --primary: #d63384; /* 改個顏色代表進階版 */
+            --bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --text: #333;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { font-size: 1.5rem; text-align: center; margin-bottom: 10px; color: var(--primary); }
+        .subtitle { font-size: 0.9rem; color: #666; margin-bottom: 20px; text-align: center; }
+        
+        .container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--primary);
+        }
+        .card-header {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .input-label {
+            font-size: 0.85rem;
+            color: #555;
+            width: 70px;
+            flex-shrink: 0;
+        }
+        select, input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            flex-grow: 1;
+            width: 100%;
+        }
+        .result-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .color-indicator {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .info-text { flex-grow: 1; margin-left: 15px; }
+        .info-title { font-size: 0.8rem; color: #666; }
+        .info-detail { font-size: 1.1rem; font-weight: bold; color: #000; }
+        .phy-info { font-size: 0.8rem; color: #d63384; margin-top: 2px; }
+
+        /* CHT Color Codes */
+        .c-grey { background-color: #6c757d; }
+        .c-blue { background-color: #007bff; }
+        .c-yellow { background-color: #ffc107; color: #000; text-shadow: none; }
+        .c-green { background-color: #28a745; }
+        .c-red { background-color: #dc3545; }
+        .c-purple { background-color: #6f42c1; }
+        .c-white { background-color: #ffffff; color: #000; text-shadow: none; border: 1px solid #ccc; }
+        .c-brown { background-color: #795548; }
+        .c-black { background-color: #343a40; }
+        .c-aqua { background-color: #17a2b8; }
+        .c-orange { background-color: #fd7e14; }
+        .c-pink { background-color: #e83e8c; }
+
+        .splicing-guide {
+            text-align: center;
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px dashed #ffeeba;
+        }
+        .arrow { font-size: 1.5rem; color: #ccc; text-align: center; margin: -10px 0; }
+    </style>
+</head>
+<body>
+
+    <h1>光纖續接計算機</h1>
+    <div class="subtitle">支援：系統編號 Offset 計算 (如 49-96)</div>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">A 端光纜 (來源)</div>
+            
+            <div class="input-row">
+                <span class="input-label">光纜規格</span>
+                <select id="typeA" onchange="calculate('A')">
+                    <option value="216">216 芯 (12/管)</option>
+                    <option value="96">96 芯 (12/管)</option>
+                    <option value="48" selected>48 芯 (6/管)</option>
+                    <option value="24">24 芯 (6/管)</option>
+                    <option value="12">12 芯 (單管)</option>
+                </select>
+            </div>
+            <div class="input-row">
+                <span class="input-label">起始編號</span>
+                <input type="number" id="startA" value="49" min="1" oninput="calculate('A')">
+            </div>
+            <div class="input-row">
+                <span class="input-label">目標芯號</span>
+                <input type="number" id="coreA" value="50" min="1" oninput="calculate('A')">
+            </div>
+            
+            <div class="result-box">
+                <div id="tubeColorA" class="color-indicator c-grey">?</div>
+                <div class="info-text">
+                    <div class="info-title">所在束管</div>
+                    <div id="tubeTextA" class="info-detail">-</div>
+                </div>
+            </div>
+            <div class="result-box">
+                <div id="fiberColorA" class="color-indicator c-grey">?</div>
+                <div class="info-text">
+                    <div class="info-title">光纖芯色 <span id="phyTextA" class="phy-info"></span></div>
+                    <div id="fiberTextA" class="info-detail">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="arrow">⬇️</div>
+
+        <div class="card">
+            <div class="card-header">B 端光纜 (目標)</div>
+            
+            <div class="input-row">
+                <span class="input-label">光纜規格</span>
+                <select id="typeB" onchange="calculate('B')">
+                    <option value="216">216 芯 (12/管)</option>
+                    <option value="96">96 芯 (12/管)</option>
+                    <option value="48">48 芯 (6/管)</option>
+                    <option value="24" selected>24 芯 (6/管)</option>
+                    <option value="12">12 芯 (單管)</option>
+                </select>
+            </div>
+            <div class="input-row">
+                <span class="input-label">起始編號</span>
+                <input type="number" id="startB" value="49" min="1" oninput="calculate('B')">
+            </div>
+            <div class="input-row">
+                <span class="input-label">目標芯號</span>
+                <input type="number" id="coreB" value="50" min="1" oninput="calculate('B')">
+            </div>
+
+            <div class="result-box">
+                <div id="tubeColorB" class="color-indicator c-grey">?</div>
+                <div class="info-text">
+                    <div class="info-title">所在束管</div>
+                    <div id="tubeTextB" class="info-detail">-</div>
+                </div>
+            </div>
+            <div class="result-box">
+                <div id="fiberColorB" class="color-indicator c-grey">?</div>
+                <div class="info-text">
+                    <div class="info-title">光纖芯色 <span id="phyTextB" class="phy-info"></span></div>
+                    <div id="fiberTextB" class="info-detail">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="splicing-guide" id="summary">
+            請輸入資料
+        </div>
+    </div>
+
+    <script>
+        const colors = [
+            { name: '灰', class: 'c-grey' },
+            { name: '藍', class: 'c-blue' },
+            { name: '黃', class: 'c-yellow' },
+            { name: '綠', class: 'c-green' },
+            { name: '紅', class: 'c-red' },
+            { name: '紫', class: 'c-purple' },
+            { name: '白', class: 'c-white' },
+            { name: '棕', class: 'c-brown' },
+            { name: '黑', class: 'c-black' },
+            { name: '天', class: 'c-aqua' },
+            { name: '橘', class: 'c-orange' },
+            { name: '粉', class: 'c-pink' }
+        ];
+
+        function getFiberInfo(totalCores, startNo, targetNo) {
+            totalCores = parseInt(totalCores);
+            startNo = parseInt(startNo);
+            targetNo = parseInt(targetNo);
+
+            // 1. 計算物理芯號 (Physical Index)
+            // 公式： 目標 - 起始 + 1
+            // 例如： 目標49 - 起始49 + 1 = 第1芯
+            let phyIndex = targetNo - startNo + 1;
+
+            if (isNaN(phyIndex) || phyIndex < 1 || phyIndex > totalCores) {
+                return { error: true, msg: `超出範圍 (實體第${phyIndex}芯)` };
+            }
+
+            let tubeColorObj, coreColorObj, tubeDesc;
+            let unitCores;
+
+            // 邏輯判斷
+            if (totalCores === 12) {
+                // 12芯單管
+                unitCores = 12;
+                tubeDesc = "固定白管";
+                tubeColorObj = colors[6]; // White
+                let rem = phyIndex % 12;
+                coreColorObj = colors[rem];
+            } 
+            else if (totalCores === 24 || totalCores === 48) {
+                // 6芯/管 規則
+                unitCores = 6;
+                let tubeNum = Math.ceil(phyIndex / 6);
+                tubeColorObj = colors[tubeNum % 12];
+                tubeDesc = tubeColorObj.name + "管";
+
+                let rem = phyIndex % 6;
+                if (rem === 0) coreColorObj = colors[6]; // White
+                else coreColorObj = colors[rem];
+            } 
+            else {
+                // 12芯/管 規則
+                unitCores = 12;
+                let tubeNum = Math.ceil(phyIndex / 12);
+                let rem = phyIndex % 12;
+                coreColorObj = colors[rem];
+
+                if (totalCores === 216) {
+                    if (tubeNum <= 6) {
+                        tubeColorObj = colors[tubeNum % 12];
+                        tubeDesc = `內層-${tubeColorObj.name}管`;
+                    } else {
+                        let outerNum = tubeNum - 6;
+                        tubeColorObj = colors[outerNum % 12];
+                        tubeDesc = `外層-${tubeColorObj.name}管`;
+                    }
+                } else {
+                    tubeColorObj = colors[tubeNum % 12];
+                    tubeDesc = tubeColorObj.name + "管";
+                }
+            }
+
+            return {
+                error: false,
+                phyIndex: phyIndex,
+                tubeDesc: tubeDesc,
+                tubeColorClass: tubeColorObj.class,
+                tubeName: tubeColorObj.name,
+                coreName: coreColorObj.name,
+                coreColorClass: coreColorObj.class
+            };
+        }
+
+        function calculate(side) {
+            const type = document.getElementById(`type${side}`).value;
+            const start = document.getElementById(`start${side}`).value;
+            const core = document.getElementById(`core${side}`).value;
+
+            const res = getFiberInfo(type, start, core);
+            
+            const tubeColorDiv = document.getElementById(`tubeColor${side}`);
+            const tubeTextDiv = document.getElementById(`tubeText${side}`);
+            const fiberColorDiv = document.getElementById(`fiberColor${side}`);
+            const fiberTextDiv = document.getElementById(`fiberText${side}`);
+            const phyTextSpan = document.getElementById(`phyText${side}`);
+
+            if (!res.error) {
+                tubeColorDiv.className = `color-indicator ${res.tubeColorClass}`;
+                tubeColorDiv.innerText = res.tubeName;
+                tubeTextDiv.innerText = res.tubeDesc;
+
+                fiberColorDiv.className = `color-indicator ${res.coreColorClass}`;
+                fiberColorDiv.innerText = res.coreName;
+                fiberTextDiv.innerText = res.coreName + "芯";
+                
+                phyTextSpan.innerText = `(實體第 ${res.phyIndex} 芯)`;
+            } else {
+                tubeTextDiv.innerText = "範圍錯誤";
+                fiberTextDiv.innerText = res.msg;
+                phyTextSpan.innerText = "";
+                tubeColorDiv.className = "color-indicator c-grey";
+                fiberColorDiv.className = "color-indicator c-grey";
+                tubeColorDiv.innerText = "?";
+                fiberColorDiv.innerText = "?";
+            }
+
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const resA = getFiberInfo(
+                document.getElementById('typeA').value,
+                document.getElementById('startA').value,
+                document.getElementById('coreA').value
+            );
+            const resB = getFiberInfo(
+                document.getElementById('typeB').value,
+                document.getElementById('startB').value,
+                document.getElementById('coreB').value
+            );
+
+            const summaryDiv = document.getElementById('summary');
+
+            if (!resA.error && !resB.error) {
+                summaryDiv.innerHTML = `
+                    <div style="font-weight:bold; margin-bottom:5px;">施工指令單：</div>
+                    將標籤 <strong style="color:var(--primary);">${document.getElementById('coreA').value}</strong> 號<br>
+                    (A端 ${resA.tubeDesc} / ${resA.coreName}芯)<br>
+                    ⬇️ 熔接至 ⬇️<br>
+                    (B端 ${resB.tubeDesc} / ${resB.coreName}芯)
+                `;
+            } else {
+                summaryDiv.innerText = "請檢查輸入的芯號是否超出設定範圍";
+            }
+        }
+
+        // Init
+        calculate('A');
+        calculate('B');
+    </script>
+</body>
+</html>
